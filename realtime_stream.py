@@ -61,8 +61,6 @@ def on_error(ws, error):
   print(error)
 
 if __name__ == '__main__':
-    # Obviously replace BTCUSDT with whichever symbol you want from binance
-    # Wherever you've saved this code is the same directory you will find the resulting CSV file
     SOCKET_URL = get_stream_url('BTCUSDT')
     print(f'connecting to: {SOCKET_URL}')
     ws = websocket.WebSocketApp(SOCKET_URL, on_open=on_open, on_close=on_close, on_message=on_message, on_error=on_error)
