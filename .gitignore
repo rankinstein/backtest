@@ -1,0 +1,7 @@
+.DS_Store
+.vscode
+pyvenv.cfg
+lib
+bin
+include
+secrets.py
