@@ -1,25 +1,21 @@
-import websocket
+import asyncio
+import websockets
 import json
+from rx.subject import Subject
 import pprint
+try:
+    import thread
+except ImportError:
+    import _thread as thread
 
 BASE_SOCKET = 'wss://stream.binance.com:9443'
-
-candles = []
 
 def get_stream_url(ticker, timespan = '1m'):
   return BASE_SOCKET + '/ws/' + ticker.lower() + '@kline_' + timespan
 
-def on_open(ws):
-  print('on open')
+def parse_kline(message):
+    data = json.loads(message)
 
-def on_close(ws):
-  print('on close')
-  pprint.pprint(candles)
-
-def on_message(ws, message):
-  print('on message')
-  data = json.loads(message)
-  if data.get('e') == 'kline':
     candle = data.get('k')
 
     event_time = data.get('E')
@@ -35,33 +31,56 @@ def on_message(ws, message):
     close = candle.get('c')
     volume = candle.get('v')
     is_last_tick = candle.get('x')
+    
+    return {
+      'tick_time': event_time,
+      'open_time': start_time,
+      'close_time': close_time,
+      'interval': interval,
+      'symbol': symbol,
+      'high': float(high),
+      'low': float(low),
+      'open': float(open),
+      'close': float(close),
+      'volume': float(volume),
+      'is_last_tick': is_last_tick
+    }
 
-    if is_last_tick:
-      print('last tick of candle')
-      candles.append({
-        "start": start_time,
-        "end": close_time,
-        "interval": interval,
-        "symbol": symbol,
-        "high": high,
-        "low": low,
-        "open": open,
-        "close": close,
-        "volume": volume
-      })
+class BinanceStream():
+    def __init__(self):
+        self.stream = Subject()
+        self.sockets = {}
+        self.loop = asyncio.get_event_loop()
 
-    print(f'High: {high}')
-    print(f'Low: {low}')
-    print(f'Open: {open}')
-    print(f'Close: {close}')
-    print(f'Volume: {volume}')
-    print(f'Last tick: {is_last_tick}')
+    async def on_message(self, websocket):
+        while True:
+            try:
+                message = await websocket.recv()
+                next_message = parse_kline(message)
+                self.stream.on_next(next_message)
 
-def on_error(ws, error):
-  print(error)
+
+            except websockets.ConnectionClosed as cc:
+                print('Connection closed')
+                self.stream.on_error(cc)
+
+            except Exception as e:
+                print('Something happened')
+                self.stream.on_error(e)
+
+    async def create_task(self, ticker):
+        self.sockets[ticker] = await websockets.connect(get_stream_url(ticker))
+        asyncio.ensure_future(self.on_message(self.sockets[ticker]))
+    
+    def connect(self, ticker):
+        self.loop.run_until_complete(self.create_task(ticker))
+
+    def run_forever(self):
+        self.loop.run_forever()
 
 if __name__ == '__main__':
-    SOCKET_URL = get_stream_url('BTCUSDT')
-    print(f'connecting to: {SOCKET_URL}')
-    ws = websocket.WebSocketApp(SOCKET_URL, on_open=on_open, on_close=on_close, on_message=on_message, on_error=on_error)
-    ws.run_forever()
+    bs = BinanceStream()
+    bs.connect('BTCUSDT')
+    bs.connect('BNBBTC')
+    bs.stream.subscribe(lambda x: pprint.pprint(x))
+    bs.run_forever()

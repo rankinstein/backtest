@@ -3,3 +3,8 @@ pandas
 numpy
 ta-lib
 websocket_client
+rx
+websockets
+bokeh
+backtrader
+pip install matplotlib==3.2.2 # https://stackoverflow.com/questions/63471764/importerror-cannot-import-name-warnings-from-matplotlib-dates

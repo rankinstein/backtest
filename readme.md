@@ -9,12 +9,27 @@ Basic setup for capturing historical binance data.
 
 # Pre-Setup
 1. Get binance API keys and copy them to secrets.py
+2. The `secrets.py` should look like this:
+   ```
+   api_key = 'API_KEY_FROM_BINANCE'
+   api_secret = 'API_SECRET_FROM_BINANCE'
+   ```
 2. Create your python virtual env `python3 -m venv .`
 
 # Setup
 1. Activate venv: `source bin/activate`
    Note: to close your virtual env `deactivate`
 2. Install requirements: `pip3 install -r requirements.txt`
+
+# Scripts
+## download_history.py
+Save historical data as csv files. Defaults to `BTCUSDT` `1 hour`
+
+Examples:
+- `python download_historical.py BTCUSDT 4h`
+
+## realtime_stream.py
+Read live streamed data from Binance. Defaults to `BTCUSDT 1-minute`
 
 # References
 - Binance WS API: `https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#klinecandlestick-streams`
