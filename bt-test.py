@@ -27,67 +27,20 @@ from pprint import pprint
 import pandas as pd
 
 import backtrader as bt
+from strategies import Hodl, SMA
+
+TS_MULTIPLE = 1000000 # Scale the timestamp for correct parsing
 
 def get_df():
   df = pd.read_csv('./price_history/ADABNB_5m_2021-03-16_to_2021-03-18.csv',index_col=0,parse_dates=True)
-
-  # def convertTS(ts):
-  #   try:
-  #     return datetime.fromtimestamp(ts)
-  #   except ValueError as e:
-  #     return ''
-  # df.index.map(convertTS)
-  pprint(df.index)
-  df.index = pd.to_datetime(df.index)
+  df.index = pd.to_datetime(df.index.map(lambda x: x * TS_MULTIPLE))
+  df.index = df.index
   df.index.name = 'datetime'
   return df
 
-class SmaCross(bt.SignalStrategy):
-    def __init__(self):
-        self.inposition = False
-        self.sma50 = bt.ind.SimpleMovingAverage(period=50)
-        self.sma200 = bt.ind.SimpleMovingAverage(period=200)
-        self.stoch = bt.ind.Stochastic()
-        
-        self.cross = bt.ind.CrossOver(self.sma50, self.sma200)
-        self.dataclose = self.datas[0].close
-
-    def log(self, txt, dt=None):
-        ''' Logging function for this strategy'''
-        dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
-
-    def start(self):
-        pass
-
-    def stop(self):
-        pass
-
-    def next(self):
-        if not self.inposition:
-            self.inposition = True
-            self.buy()
-        
-        if len(self.data) == self.data.buflen():
-            self.inposition = False
-            self.sell()
-        # pprint(self.stoch)
-        # self.log('Stoch, %.2f' % self.stoch)
-        # if not self.inposition and self.cross == 1:
-        #     self.inposition = True
-        #     self.log('BUY CREATE, %.2f' % self.dataclose[0])
-        #     self.buy()
-        #     pass
-
-        # elif self.inposition and self.cross == -1:
-        #     self.inposition = False
-        #     self.log('Sell CREATE, %.2f' % self.dataclose[0])
-        #     self.sell()
-        #     pass
-
 cerebro = bt.Cerebro()
 cerebro.broker.setcash(10000.0)
-cerebro.addstrategy(SmaCross)
+cerebro.addstrategy(SMA)
 
 df = get_df()
 
@@ -99,4 +52,4 @@ data0 = bt.feeds.PandasData(
 cerebro.adddata(data0)
 
 cerebro.run()
-cerebro.plot()
+cerebro.plot(style='candlestick', barup='green')
