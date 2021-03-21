@@ -32,7 +32,7 @@ from strategies import Hodl, SMA
 TS_MULTIPLE = 1000000 # Scale the timestamp for correct parsing
 
 def get_df():
-  df = pd.read_csv('./price_history/ADABNB_5m_2021-03-16_to_2021-03-18.csv',index_col=0,parse_dates=True)
+  df = pd.read_csv('./price_history/LINKBTC_1h_2021-02-01_to_2021-03-14.csv',index_col=0,parse_dates=True)
   df.index = pd.to_datetime(df.index.map(lambda x: x * TS_MULTIPLE))
   df.index = df.index
   df.index.name = 'datetime'

@@ -33,6 +33,5 @@ class Hodl(bt.SignalStrategy):
             self.inposition = True
             self.buy()
         
-        if len(self.data) == self.data.buflen():
-            self.inposition = False
+        if len(self.data) == self.data.buflen() - 1:
             self.sell()
