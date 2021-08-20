@@ -6,9 +6,15 @@ Basic setup for capturing historical binance data.
 2. Playback historical data
 3. Run strategies against historical data
 4. Evaluate effectiveness of strategies
+5. Screen data for desired conditions
 
 # Pre-Setup
-1. Get binance API keys and copy them to secrets.py
+1. Get binance API keys and copy them to `secrets.py`
+```
+# secrets.py
+api_key = 'KEY_HERE'
+api_secret = 'SECRET_HERE'
+```
 2. The `secrets.py` should look like this:
    ```
    api_key = 'API_KEY_FROM_BINANCE'

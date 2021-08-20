@@ -23,6 +23,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import argparse
 import datetime
+import os
 from pprint import pprint
 import pandas as pd
 
@@ -32,11 +33,20 @@ from strategies import Hodl, SMA
 TS_MULTIPLE = 1000000 # Scale the timestamp for correct parsing
 
 def get_df():
-  df = pd.read_csv('./price_history/LINKBTC_1h_2021-02-01_to_2021-03-14.csv',index_col=0,parse_dates=True)
-  df.index = pd.to_datetime(df.index.map(lambda x: x * TS_MULTIPLE))
-  df.index = df.index
-  df.index.name = 'datetime'
-  return df
+    SOURCE_DIR = './price_history'
+    sources = os.listdir(SOURCE_DIR)
+    if len(sources) <= 0:
+        raise ValueError(f'No data in {SOURCE_DIR}')
+    sources.sort()
+
+    print(f'Sources: {sources}')
+    choice = sources[0]
+    print(f'Loading: {choice}')
+    df = pd.read_csv(f'./price_history/{choice}',index_col=0,parse_dates=True)
+    df.index = pd.to_datetime(df.index.map(lambda x: x * TS_MULTIPLE))
+    df.index = df.index
+    df.index.name = 'datetime'
+    return df
 
 cerebro = bt.Cerebro()
 cerebro.broker.setcash(10000.0)

@@ -16,6 +16,7 @@ class SMA(bt.Strategy):
 
     def __init__(self):
         self.sma50 = bt.ind.SimpleMovingAverage(period=50)
+        self.sma2x50 = self.sma50 * 2
         self.sma200 = bt.ind.SimpleMovingAverage(period=200)
         self.stoch = bt.ind.Stochastic()
         
